@@ -7,9 +7,17 @@ import { logout } from "../services/authService";
 
 import { toast } from "react-toastify";
 
+import { fetchCustomers } from "../store/customerSlice";
+import { useDispatch, useSelector } from "react-redux";
+
 
 
 export const CustomerList = () => {
+
+    const dispatch = useDispatch();
+    const { customers } = useSelector((state) => state.customer);
+    const loading = useSelector((state) => state.loading);
+    const authError  = useSelector((state) => state.error);
 
     const navigate = useNavigate();
 
@@ -21,7 +29,7 @@ export const CustomerList = () => {
         "status" : "",
     }
 
-    const [customers, setCustomers] = useState([{}]);
+    // const [customers, setCustomers] = useState([{}]);
 
     const [deleted, setDeleted ] = useState(false);
 
@@ -33,39 +41,48 @@ export const CustomerList = () => {
 
     // fetch customers
     useEffect(()=>{
+        dispatch(fetchCustomers());
 
-        async function fetchCustomerList(){
-            
-            try {
-                const result = await fetchCustomer();
-                
-                if(result.message ==="auth-failed"){
-                    // error condition
-                    logout();
-                    navigate("/login");
-                    toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-                    return true;
-                }
-                
-                const formatedData = result.map((item) => (
-                    {
-                    ...item,
-                    dateOfBirth: new Date(item.dateOfBirth).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                    })  
-                }))
-                setDeleted(false);
-                setUpdated(false);
-                setCustomers(formatedData);
-            }catch(error){
-            
-                toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-            }
+        if(authError){
+            console.log(authError);
+            logout();
+            navigate("/login");
+            toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+            return true;
         }
+
+        // async function fetchCustomerList(){
+            
+        //     try {
+        //         const result = await fetchCustomer();
+                
+        //         if(result.message ==="auth-failed"){
+        //             // error condition
+        //             logout();
+        //             navigate("/login");
+        //             toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+        //             return true;
+        //         }
+                
+        //         const formatedData = result.map((item) => (
+        //             {
+        //             ...item,
+        //             dateOfBirth: new Date(item.dateOfBirth).toLocaleDateString('en-US', {
+        //                 year: 'numeric',
+        //                 month: 'short',
+        //                 day: 'numeric',
+        //             })  
+        //         }))
+        //         setDeleted(false);
+        //         setUpdated(false);
+        //         setCustomers(formatedData);
+        //     }catch(error){
+            
+        //         toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+        //     }
+        // }
         
-        fetchCustomerList();
+        // fetchCustomerList();
 
     },[deleted,updated])
 

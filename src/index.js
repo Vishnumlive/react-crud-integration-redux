@@ -5,6 +5,8 @@ import App from './App';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Provider } from 'react-redux';
+import  { store }  from "./store/store";
 
 import { BrowserRouter } from "react-router-dom";
 
@@ -14,7 +16,10 @@ root.render(
   <React.StrictMode>
     <BrowserRouter >
       <ToastContainer closeButton={ false } autoClose={3000} position={"bottom-right"} />
-      <App />
+
+      <Provider store={store}>
+        <App />
+      </Provider>
     </BrowserRouter>
   </React.StrictMode>
 );

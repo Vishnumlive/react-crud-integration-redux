@@ -8,15 +8,8 @@ export const Login = () => {
 
     const navigate = useNavigate();
 
-    const initialFormData = {
-        "username" : "",
-        "password" : "",
-    }
-
     const userName = useRef("");
     const password = useRef("");
-
-    const [formData, setFormData] = useState(initialFormData);
 
     async function checkUserLogin(forms) {
 
