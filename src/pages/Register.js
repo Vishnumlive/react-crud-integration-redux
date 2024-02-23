@@ -95,6 +95,7 @@ export const Register = () => {
                 </div>
               </form>
             </div>
+            
             <div className="flex justify-center items-center mt-6">
               <Link to="/login" className="inline-flex items-center font-bold text-blue-500 hover:text-blue-700 text-xs text-center">
                 <span>
