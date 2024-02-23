@@ -7,7 +7,7 @@ import { logout } from "../services/authService";
 
 import { toast } from "react-toastify";
 
-import { fetchCustomers } from "../store/customerSlice";
+import { fetchCustomers, deleteACustomer, editACustomer } from "../store/customerSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 
@@ -15,9 +15,9 @@ import { useDispatch, useSelector } from "react-redux";
 export const CustomerList = () => {
 
     const dispatch = useDispatch();
-    const { customers } = useSelector((state) => state.customer);
-    const loading = useSelector((state) => state.loading);
-    const authError  = useSelector((state) => state.error);
+    const customers = useSelector((state) => state.customer.customers);
+    const { loading } = useSelector((state) => state.customer);
+    const { error }  = useSelector((state) =>  state.customer);
 
     const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ export const CustomerList = () => {
         "status" : "",
     }
 
-    // const [customers, setCustomers] = useState([{}]);
+    const [customerList, setCustomerList] = useState([]);
 
     const [deleted, setDeleted ] = useState(false);
 
@@ -39,60 +39,66 @@ export const CustomerList = () => {
 
     const [singleUser, setSingleUser] = useState(initialUserData);
 
+    const [noCustomer , setNoCustomer] = useState(false);
+    
+    
+    
     // fetch customers
     useEffect(()=>{
-        dispatch(fetchCustomers());
+        async function initialDataLoad(){
+            const data = await dispatch(fetchCustomers());
+            console.log(data.payload.length);
 
-        if(authError){
-            console.log(authError);
-            logout();
-            navigate("/login");
-            toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-            return true;
+            if(data.payload.message  ==="auth-failed"){
+
+                logout();
+                navigate("/login");
+                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+            
+            }
+
         }
 
-        // async function fetchCustomerList(){
-            
-        //     try {
-        //         const result = await fetchCustomer();
-                
-        //         if(result.message ==="auth-failed"){
-        //             // error condition
-        //             logout();
-        //             navigate("/login");
-        //             toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-        //             return true;
-        //         }
-                
-        //         const formatedData = result.map((item) => (
-        //             {
-        //             ...item,
-        //             dateOfBirth: new Date(item.dateOfBirth).toLocaleDateString('en-US', {
-        //                 year: 'numeric',
-        //                 month: 'short',
-        //                 day: 'numeric',
-        //             })  
-        //         }))
-        //         setDeleted(false);
-        //         setUpdated(false);
-        //         setCustomers(formatedData);
-        //     }catch(error){
-            
-        //         toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-        //     }
-        // }
+        initialDataLoad();
         
-        // fetchCustomerList();
+    },[deleted, updated])
 
-    },[deleted,updated])
+    useEffect(()=>{
+        
+        if (customers && customers.length > 0) {
+            // Condition to execute when customers exist
+
+            const formatedData = customers.map((item) => (
+                {
+                ...item,
+                dateOfBirth: new Date(item.dateOfBirth).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                })  
+            }))
+
+            setCustomerList(formatedData);
+            setNoCustomer(false);
+            
+        }else {
+            setNoCustomer(true);
+            setCustomerList([]);
+        }
+
+    },[deleted,updated, customers])
 
     // delete customer
     async function deleteCustomer(userid){
         
         try{
-            const data = await deleteCustomerById(userid);
+            // const data = await deleteCustomerById(userid);
 
-            if(data.message ==="auth-failed"){
+            const data  = await dispatch(deleteACustomer(userid));
+
+            // console.log(data);
+
+            if(data.payload.message ==="auth-failed"){
                 // error condition
                 logout();
                 navigate("/login");
@@ -101,7 +107,7 @@ export const CustomerList = () => {
             }
 
 
-            if(data){
+            if(data.payload){
                 
                 setDeleted(true);
 
@@ -118,18 +124,16 @@ export const CustomerList = () => {
     async function getUser(userid){
 
         try{
-            const data = await getSingleUser(userid);
 
-            if(data.message ==="auth-failed"){
-                // error condition
-                logout();
-                navigate("/login");
-                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-                return true;
-            }
-
-            data.dateOfBirth = formatDate(data.dateOfBirth);
-            setSingleUser(data);
+            console.log(userid);
+            const userDetails = customers.filter((item) => {
+                return item._id === userid ;
+            });
+            
+            const data = userDetails[0];
+            const updatedDob = formatDate(data.dateOfBirth);
+            
+            setSingleUser({...data, dateOfBirth : updatedDob});
 
         }catch(error){
             
@@ -142,9 +146,11 @@ export const CustomerList = () => {
     async function updateUser(userData){
         
         try{
-            const data  = await updateUserDetails(userData);
+            // const data  = await updateUserDetails(userData);
 
-            if(data.message ==="auth-failed"){
+            const data = await dispatch(editACustomer(userData));
+
+            if(data.payload.message ==="auth-failed"){
                 // error condition
                 logout();
                 navigate("/login");
@@ -152,7 +158,7 @@ export const CustomerList = () => {
                 return true;
             }
 
-            if(data){
+            if(data.payload){
 
                 setUpdated(true);
                 toast.success("User updated successfully", { position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
@@ -319,8 +325,10 @@ export const CustomerList = () => {
                      </tr>
                   </thead>
                   <tbody>
+            
+                    { 
                     
-                    { customers.map((customer, id) => (
+                    customerList.map((customer, id) => (
 
                         
                         
@@ -435,6 +443,16 @@ export const CustomerList = () => {
                             </td>
                         </tr>
                     ))}
+
+                    {
+                        noCustomer && (
+                            <tr>
+                                <td colSpan={4}>
+                                    <p>No customers Found</p>
+                                </td>
+                            </tr>
+                        )
+                    }
 
                     {/* --------------------- */}
                      

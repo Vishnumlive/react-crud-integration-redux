@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { addCustomer } from "../services/customerService";
@@ -7,9 +7,18 @@ import { logout } from "../services/authService";
 
 import { toast } from "react-toastify";
 
+import { addACustomer } from "../store/customerSlice";
+import { useDispatch, useSelector } from "react-redux";
+
 
 
 export const AddCustomer = () => {
+
+    const dispatch = useDispatch();
+
+    const customers = useSelector((state) => state.customer.customers);
+    const { loading } = useSelector((state) => state.customer);
+    const { error }  = useSelector((state) =>  state.customer);
 
     const navigate = useNavigate();
 
@@ -25,20 +34,22 @@ export const AddCustomer = () => {
     const [formData, setFormData] = useState(initialFormData);
 
     async function addNewCustomer(userData){
+
+        console.log(userData);
         
         try{
 
-            const data = await addCustomer(userData);
+            const data = await dispatch(addACustomer(userData));
 
-            if(data.message  ==="auth-failed"){
+            if(data.payload.message  ==="auth-failed"){
                 // error condition
                 logout();
                 navigate("/login");
                 toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
-                return true;
+                // return true;
             }
             
-            if(data._id){
+            if(data.payload._id){
                 setFormData(initialFormData);
                 
                 toast.success("User added successfully", { position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
@@ -50,7 +61,6 @@ export const AddCustomer = () => {
             toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
         }
     }
-    
 
     const handleAddCustomer = (event) => {
         event.preventDefault();

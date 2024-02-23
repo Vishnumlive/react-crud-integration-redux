@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import { userLogin } from "../services/authService";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { toast } from "react-toastify";
 
 export const Login = () => {
 
@@ -20,6 +22,10 @@ export const Login = () => {
             sessionStorage.setItem("cuser", "vishnu");
 
             navigate("/");
+        }else{
+
+          toast.error("Login Failed, Please check your username and password",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                
         }
     }
     const handleLogin = (event) => {
@@ -30,8 +36,6 @@ export const Login = () => {
             "password" : password.current.value,
         }
         
-        
-         
         checkUserLogin(forms);
     }
 
@@ -44,15 +48,11 @@ export const Login = () => {
       <div className="flex flex-col bg-white shadow-md px-4 sm:px-6 md:px-8 lg:px-10 py-8 rounded-md w-full max-w-md">
         <div className="font-medium self-center text-xl sm:text-2xl uppercase text-gray-800">Login To Your Account</div>
         
-        <div className="relative mt-10 h-px bg-gray-300">
-          <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
-            <span className="bg-white px-4 text-xs text-gray-500 uppercase">Or Login With User Name</span>
-          </div>
-        </div>
+        
         <div className="mt-10">
           <form onSubmit={ handleLogin } action="#">
             <div className="flex flex-col mb-6">
-              <label for="email" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">User Name:</label>
+              <label htmlFor="username" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">User Name:</label>
               <div className="relative">
                 <div className="inline-flex items-center justify-center absolute left-0 top-0 h-full w-10 text-gray-400">
                   
@@ -62,7 +62,7 @@ export const Login = () => {
               </div>
             </div>
             <div className="flex flex-col mb-6">
-              <label for="password" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">Password:</label>
+              <label htmlFor="password" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">Password:</label>
               <div className="relative">
                 <div className="inline-flex items-center justify-center absolute left-0 top-0 h-full w-10 text-gray-400">
                   <span>
@@ -84,7 +84,7 @@ export const Login = () => {
               <button type="submit" className="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded py-2 w-full transition duration-150 ease-in">
                 <span className="mr-2 uppercase">Login</span>
                 <span>
-                  <svg className="h-6 w-6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
@@ -93,14 +93,16 @@ export const Login = () => {
           </form>
         </div>
         <div className="flex justify-center items-center mt-6">
-          <a href="#" target="_blank" className="inline-flex items-center font-bold text-blue-500 hover:text-blue-700 text-xs text-center">
+          <Link to="/register" className="inline-flex items-center font-bold text-blue-500 hover:text-blue-700 text-xs text-center">
             <span>
-              <svg className="h-6 w-6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                 <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </span>
-            <span className="ml-2">You don't have an account?</span>
-          </a>
+            <span className="ml-2">
+              You don't have an account?
+            </span>
+          </Link>
         </div>
       </div>
     </div>

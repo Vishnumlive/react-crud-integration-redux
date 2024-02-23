@@ -17,6 +17,25 @@ export async function userLogin(loginDetails){
     return data;
 }
 
+export async function registerNewUser(userDetails){
+    var url = `http://localhost:8000/register`
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: "include",
+        body: JSON.stringify(userDetails)
+    })
+
+    if(!response.ok){
+        throw {message : response.statusText, statusCode : response.status} // eslint-disable-line
+    }
+
+    const data = await response.json();
+
+    return data;
+}
+
 export function logout(){
     sessionStorage.removeItem("cuser");
 }
